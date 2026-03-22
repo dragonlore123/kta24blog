@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Image;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PostController extends Controller
 {
@@ -34,17 +33,21 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+        // Create the post
         $post = new Post($request->validated());
         $post->user()->associate(Auth::user());
         $post->save();
 
-        $file = $request->file('image')->store();
-        $image = new Image();
-        $image->path = Storage::url($file);
-        $image->post()->associate($post);
-        $image->save();
+        // Handle image upload if present
+        if ($request->hasFile('image')) {
+            $file = $request->file('image')->store('images'); // stored in storage/app/images
+            $image = new Image();
+            $image->path = Storage::url($file); // generates a URL for public access
+            $image->post()->associate($post);
+            $image->save();
+        }
 
-        return redirect()->route('posts.index');
+        return redirect()->route('posts.index')->with('success', 'Post created successfully!');
     }
 
     /**
@@ -68,12 +71,24 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
-
-        // $post->title = $request->input('title');
-        // $post->body = $request->input('body');
         $post->update($request->validated());
-        //$post->save();
-        return redirect()->route('posts.index');
+
+        // Optional: handle new image upload on update
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($post->image) {
+                Storage::delete(str_replace('/storage/', 'public/', $post->image->path));
+                $post->image->delete();
+            }
+
+            $file = $request->file('image')->store('images');
+            $image = new Image();
+            $image->path = Storage::url($file);
+            $image->post()->associate($post);
+            $image->save();
+        }
+
+        return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
     }
 
     /**
@@ -81,7 +96,13 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        // Delete associated image if exists
+        if ($post->image) {
+            Storage::delete(str_replace('/storage/', 'public/', $post->image->path));
+            $post->image->delete();
+        }
+
         $post->delete();
-        return redirect()->route('posts.index');
+        return redirect()->route('posts.index')->with('success', 'Post deleted successfully!');
     }
 }
