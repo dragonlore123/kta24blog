@@ -7,27 +7,27 @@
       <ul
         tabindex="0"
         class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-        <li><a href="/about">About</a></li>
+        <li><a href="{{ route('about') }}">About</a></li>
         <li>
-          <a>Parent</a>
+          <a>Admin</a>
           <ul class="p-2">
-            <li><a>Submenu 1</a></li>
+            <li><a href="{{ route('posts.index') }}">Posts</a></li>
             <li><a>Submenu 2</a></li>
           </ul>
         </li>
         <li><a>Item 3</a></li>
       </ul>
     </div>
-    <a href="/" class="btn btn-ghost text-xl">daisyUI</a>
+    <a href="{{ route('home') }}" class="btn btn-ghost text-xl">daisyUI</a>
   </div>
   <div class="navbar-center hidden lg:flex">
-    <ul class="menu menu-horizontal px-1">
-      <li><a href="/about">About</a></li>
+    <ul class="menu menu-horizontal px-1 z-10">
+      <li><a href="{{ route('about') }}">About</a></li>
       <li>
         <details>
-          <summary>Parent</summary>
+          <summary>Admin</summary>
           <ul class="p-2">
-            <li><a>Submenu 1</a></li>
+            <li><a href="{{ route('posts.index') }}">Posts</a></li>
             <li><a>Submenu 2</a></li>
           </ul>
         </details>
